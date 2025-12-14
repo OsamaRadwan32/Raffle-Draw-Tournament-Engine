@@ -244,22 +244,37 @@
     {
       "GroupName": "Group A",
       "TeamIds": [
-        7
+        7,
+        4,
+        5,
+        3
       ]
     },
     {
       "GroupName": "Group B",
       "TeamIds": [
-        13
+        13,
+        12,
+        2,
+        15
       ]
     },
     {
       "GroupName": "Group C",
-      "TeamIds": []
+      "TeamIds": [
+        10,
+        6,
+        1,
+        9
+      ]
     },
     {
       "GroupName": "Group D",
-      "TeamIds": []
+      "TeamIds": [
+        14,
+        8,
+        11
+      ]
     }
   ],
   "Knockout": []

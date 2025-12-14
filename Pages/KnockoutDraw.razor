@@ -1,0 +1,206 @@
+@page "/knockout"
+@using PadelTournamentApp.Models
+@using PadelTournamentApp.Data
+@inject SeedService SeedData
+
+<h2 class="page-title">Knockout Draw</h2>
+
+<div class="knockout-layout">
+
+    <!-- LEFT: GROUPS -->
+    <aside class="groups-panel">
+        <h3>Groups</h3>
+
+        @foreach (var g in SeedData.Groups)
+        {
+            <div class="group-box">
+                <strong>@g.GroupName</strong>
+                <ul>
+                    @foreach (var tid in g.TeamIds)
+                    {
+                        var t = SeedData.Teams.First(x => x.Id == tid);
+                        <li>@t.Name</li>
+                    }
+                </ul>
+            </div>
+        }
+    </aside>
+
+    <!-- CENTER: DRAW -->
+    <section class="draw-panel">
+
+        @if (!isReady)
+        {
+            <p class="empty">Groups must be completed before knockout draw.</p>
+        }
+        else
+        {
+            <h3 class="section-title">@CurrentStepTitle</h3>
+
+            <!-- RAFFLE DISPLAY -->
+            <div class="raffle-box">
+                @if (isShuffling)
+                {
+                    <span class="shuffle-text">@shuffleText</span>
+                }
+                else
+                {
+                    <span class="placeholder">Press Draw</span>
+                }
+            </div>
+
+            <!-- CONTROLS -->
+            <div class="draw-controls">
+                <button class="btn-draw" @onclick="DrawNext"
+                    disabled="@isShuffling || CurrentStep == KnockoutStep.Completed">
+                    Draw
+                </button>
+            </div>
+
+            <!-- MATCHES -->
+            <div class="matches">
+                @foreach (var m in CurrentMatches)
+                {
+                    <div class="match-card">
+                        <div>@m.SideA</div>
+                        <strong>vs</strong>
+                        <div>@m.SideB</div>
+                    </div>
+                }
+            </div>
+        }
+
+    </section>
+
+</div>
+
+@code {
+
+    enum KnockoutStep
+    {
+        QuarterFinals,
+        SemiFinals,
+        Completed
+    }
+
+    private KnockoutStep CurrentStep = KnockoutStep.QuarterFinals;
+
+    private bool isReady;
+    private bool isShuffling = false;
+    private string shuffleText = "";
+
+    private List<string> leaders = new();
+    private List<string> runnersUp = new();
+    private List<string> semiCandidates = new();
+
+    private List<KnockoutMatchView> QuarterFinals = new();
+    private List<KnockoutMatchView> SemiFinals = new();
+
+    private IEnumerable<KnockoutMatchView> CurrentMatches =>
+    CurrentStep == KnockoutStep.QuarterFinals ? QuarterFinals :
+    CurrentStep == KnockoutStep.SemiFinals ? SemiFinals :
+    Enumerable.Empty<KnockoutMatchView>();
+
+    private string CurrentStepTitle =>
+    CurrentStep == KnockoutStep.QuarterFinals ? "Quarter-Final Draw" :
+    CurrentStep == KnockoutStep.SemiFinals ? "Semi-Final Draw" :
+    "Draw Completed";
+
+    protected override void OnInitialized()
+    {
+        if (SeedData.Groups.Count < 2 || SeedData.Groups.Any(g => g.TeamIds.Count < 2))
+            return;
+
+        isReady = true;
+
+        leaders = SeedData.Groups
+        .Select(g => $"Winner {g.GroupName}")
+        .ToList();
+
+        runnersUp = SeedData.Groups
+        .Select(g => $"Runner-up {g.GroupName}")
+        .ToList();
+    }
+
+    private async Task DrawNext()
+    {
+        isShuffling = true;
+        shuffleText = "";
+
+        var rnd = new Random();
+
+        // Visual shuffle
+        for (int i = 0; i < 18; i++)
+        {
+            if (CurrentStep == KnockoutStep.QuarterFinals)
+            {
+                shuffleText =
+                $"{leaders[rnd.Next(leaders.Count)]} vs {runnersUp[rnd.Next(runnersUp.Count)]}";
+            }
+            else
+            {
+                shuffleText =
+                $"{semiCandidates[rnd.Next(semiCandidates.Count)]} vs {semiCandidates[rnd.Next(semiCandidates.Count)]}";
+            }
+
+            await Task.Delay(90);
+        }
+
+        isShuffling = false;
+
+        if (CurrentStep == KnockoutStep.QuarterFinals)
+            DrawQuarterFinal(rnd);
+        else if (CurrentStep == KnockoutStep.SemiFinals)
+            DrawSemiFinal(rnd);
+    }
+
+    private void DrawQuarterFinal(Random rnd)
+    {
+        var leader = leaders[rnd.Next(leaders.Count)];
+
+        var leaderGroup = leader.Split(' ').Last();
+        var validRunners = runnersUp
+        .Where(r => !r.Contains(leaderGroup))
+        .ToList();
+
+        var runner = validRunners[rnd.Next(validRunners.Count)];
+
+        leaders.Remove(leader);
+        runnersUp.Remove(runner);
+
+        QuarterFinals.Add(new KnockoutMatchView
+        {
+            SideA = leader,
+            SideB = runner
+        });
+
+        semiCandidates.Add($"Winner of {leader} vs {runner}");
+
+        if (leaders.Count == 0)
+            CurrentStep = KnockoutStep.SemiFinals;
+    }
+
+    private void DrawSemiFinal(Random rnd)
+    {
+        var a = semiCandidates[rnd.Next(semiCandidates.Count)];
+        semiCandidates.Remove(a);
+
+        var b = semiCandidates[rnd.Next(semiCandidates.Count)];
+        semiCandidates.Remove(b);
+
+        SemiFinals.Add(new KnockoutMatchView
+        {
+            SideA = a,
+            SideB = b
+        });
+
+        if (semiCandidates.Count == 0)
+            CurrentStep = KnockoutStep.Completed;
+    }
+
+    class KnockoutMatchView
+    {
+        public string SideA { get; set; } = "";
+        public string SideB { get; set; } = "";
+    }
+}
