@@ -1,0 +1,128 @@
+@page "/teams"
+@inject SeedService SeedData
+@inject NavigationManager Nav
+
+<h2 class="page-title">Create Teams</h2>
+
+<div class="team-form">
+    <select @bind="selectedPlayer1" class="select-input">
+        <option value="">Select Player 1</option>
+        @foreach (var p in AvailablePlayersForTeam)
+        {
+            <option value="@p.Id">@p.Name</option>
+        }
+    </select>
+
+    <select @bind="selectedPlayer2" class="select-input">
+        <option value="">Select Player 2</option>
+        @foreach (var p in AvailablePlayersForTeam)
+        {
+            <option value="@p.Id">@p.Name</option>
+        }
+    </select>
+
+    <button class="btn-add" @onclick="AddTeam">Add Team</button>
+</div>
+
+@if (!string.IsNullOrEmpty(statusMessage))
+{
+    <p class="@statusClass">@statusMessage</p>
+}
+
+@if (SeedData.Teams.Count == 0)
+{
+    <p class="empty">No teams created yet.</p>
+}
+else
+{
+    <div class="teams-list">
+        <table class="teams-table">
+            <thead>
+                <tr>
+                    <th style="text-align:left">Team</th>
+                    <!-- <th style="text-align:left">Players</th> -->
+                    <th style="width:50px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in SeedData.Teams)
+                {
+                    var p1 = SeedData.Players.FirstOrDefault(x => x.Id == t.Player1Id);
+                    var p2 = SeedData.Players.FirstOrDefault(x => x.Id == t.Player2Id);
+
+                    <tr>
+                        <td>@t.Name</td>
+                        <!-- <td>@p1?.Name & @p2?.Name</td> -->
+                        <td>
+                            <button class="btn-delete" @onclick="() => DeleteTeam(t.Id)">✕</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private string selectedPlayer1 = "";
+    private string selectedPlayer2 = "";
+
+    private string statusMessage = "";
+    private string statusClass = "";
+
+    private IEnumerable<Player> AvailablePlayersForTeam =>
+        SeedData.Players.Where(p => !SeedData.Teams.Any(t => t.Player1Id == p.Id || t.Player2Id == p.Id));
+
+    private async Task AddTeam()
+    {
+        if (string.IsNullOrWhiteSpace(selectedPlayer1) || string.IsNullOrWhiteSpace(selectedPlayer2))
+        {
+            statusMessage = "Please select both players.";
+            statusClass = "status-error";
+            return;
+        }
+
+        if (selectedPlayer1 == selectedPlayer2)
+        {
+            statusMessage = "A player cannot be in both positions.";
+            statusClass = "status-error";
+            return;
+        }
+
+        int p1 = int.Parse(selectedPlayer1);
+        int p2 = int.Parse(selectedPlayer2);
+
+        var player1 = SeedData.Players.First(p => p.Id == p1);
+        var player2 = SeedData.Players.First(p => p.Id == p2);
+
+        var newTeam = new Team
+        {
+            Id = SeedData.Teams.Count > 0 ? SeedData.Teams.Max(t => t.Id) + 1 : 1,
+            Player1Id = p1,
+            Player2Id = p2,
+            Name = $"{player1.Name} & {player2.Name}"
+        };
+
+        SeedData.Teams.Add(newTeam);
+        SeedData.Save();
+
+        // Reset form
+        selectedPlayer1 = "";
+        selectedPlayer2 = "";
+
+        // Reload page safely
+        Nav.NavigateTo("/teams", forceLoad: true);
+    }
+
+    private async Task DeleteTeam(int id)
+    {
+        var team = SeedData.Teams.FirstOrDefault(t => t.Id == id);
+        if (team == null)
+            return;
+
+        SeedData.Teams.Remove(team);
+        SeedData.Save();
+
+        Nav.NavigateTo("/teams", forceLoad: true);
+    }
+}

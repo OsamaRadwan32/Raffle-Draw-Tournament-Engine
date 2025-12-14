@@ -1,0 +1,89 @@
+@page "/players"
+@inject SeedService SeedData
+@inject NavigationManager Nav
+
+<h2 class="page-title">Register Players</h2>
+
+<div class="player-form">
+    <input type="text"
+           @bind="newPlayerName"
+           placeholder="Enter player name"
+           class="input-text" />
+
+    <button type="button" class="btn-add" @onclick="AddPlayer">Add Player</button>
+</div>
+
+@if (!string.IsNullOrEmpty(statusMessage))
+{
+    <p class="@statusClass">@statusMessage</p>
+}
+
+@if (SeedData.Players.Count == 0)
+{
+    <p class="empty">No players registered yet.</p>
+}
+else
+{
+    <div class="players-list">
+        <table class="players-table">
+            <thead>
+                <tr>
+                    <th style="text-align:left">Name</th>
+                    <th style="width:50px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var player in SeedData.Players)
+                {
+                    <tr>
+                        <td>@player.Name</td>
+                        <td>
+                            <button class="btn-delete" @onclick="() => DeletePlayer(player.Id)">✕</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private string newPlayerName = "";
+    private string statusMessage = "";
+    private string statusClass = "";
+
+    private async Task AddPlayer()
+    {
+        if (string.IsNullOrWhiteSpace(newPlayerName))
+        {
+            statusMessage = "Player name cannot be empty.";
+            statusClass = "status-error";
+            return;
+        }
+
+        var newPlayer = new Player
+        {
+            Id = SeedData.Players.Count > 0 ? SeedData.Players.Max(p => p.Id) + 1 : 1,
+            Name = newPlayerName.Trim()
+        };
+
+        SeedData.Players.Add(newPlayer);
+        SeedData.Save();
+
+        // Refresh full page to avoid hydration issues
+        Nav.NavigateTo("/players", forceLoad: true);
+    }
+
+    private async Task DeletePlayer(int id)
+    {
+        var player = SeedData.Players.FirstOrDefault(p => p.Id == id);
+        if (player == null)
+            return;
+
+        SeedData.Players.Remove(player);
+        SeedData.Save();
+
+        // Refresh full page to avoid hydration issues
+        Nav.NavigateTo("/players", forceLoad: true);
+    }
+}

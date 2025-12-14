@@ -1,0 +1,24 @@
+﻿@page "/"
+@inject NavigationManager Nav
+
+<div class="home-container">
+    <div class="home-card">
+        <img src="logo.jpg" alt="Tournament Logo" class="home-logo" />
+
+        <h1 class="home-title">Padel Tournament Draw</h1>
+        <p class="home-subtitle">Generate fair group stages and knockout brackets</p>
+
+        <div class="home-actions">
+            <button class="home-btn" @onclick="GoPlayers">Register Players</button>
+            <button class="home-btn" @onclick="GoTeams">Create Teams</button>
+            <button class="home-btn primary" @onclick="GoGroups">Group Draw</button>
+            <button class="home-btn disabled" disabled>Knockout Draw (Coming Soon)</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void GoPlayers() => Nav.NavigateTo("/players");
+    private void GoTeams() => Nav.NavigateTo("/teams");
+    private void GoGroups() => Nav.NavigateTo("/groups/draw");
+}

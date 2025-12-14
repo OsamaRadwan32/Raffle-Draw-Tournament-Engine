@@ -1,0 +1,80 @@
+@using PadelTournamentApp.Data
+@inject SeedService SeedData
+
+<div class="draw-box">
+    @if (_isShuffling)
+    {
+        <p class="shuffling">@_currentName</p>
+    }
+    else if (!string.IsNullOrEmpty(_selectedName))
+    {
+        <p class="selected">@_selectedName</p>
+    }
+    else
+    {
+        <p class="placeholder">Press Draw</p>
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback<int> OnTeamSelected { get; set; }
+
+    private bool _isShuffling;
+    private bool _isBusy;
+
+    private string _currentName = string.Empty;
+    private string _selectedName = string.Empty;
+
+    private readonly Random _rand = new();
+
+    public async Task StartDraw(List<int> remainingTeamIds)
+    {
+        // 🔒 Prevent concurrent runs
+        if (_isBusy)
+            return;
+
+        if (remainingTeamIds == null || remainingTeamIds.Count == 0)
+            return;
+
+        _isBusy = true;
+        _isShuffling = true;
+        _selectedName = string.Empty;
+
+        StateHasChanged();
+
+        // Shuffle animation (controlled rendering)
+        for (int i = 0; i < 20; i++)
+        {
+            var id = remainingTeamIds[_rand.Next(remainingTeamIds.Count)];
+            var team = SeedData.Teams.First(t => t.Id == id);
+
+            var p1 = SeedData.Players.First(p => p.Id == team.Player1Id);
+            var p2 = SeedData.Players.First(p => p.Id == team.Player2Id);
+
+            _currentName = $"{p1.Name} & {p2.Name}";
+
+            // Only render every second iteration
+            if (i % 2 == 0)
+                StateHasChanged();
+
+            await Task.Delay(90);
+        }
+
+        // Final selection
+        int finalTeamId = remainingTeamIds[_rand.Next(remainingTeamIds.Count)];
+        var finalTeam = SeedData.Teams.First(t => t.Id == finalTeamId);
+
+        var fp1 = SeedData.Players.First(p => p.Id == finalTeam.Player1Id);
+        var fp2 = SeedData.Players.First(p => p.Id == finalTeam.Player2Id);
+
+        _isShuffling = false;
+        _selectedName = $"{fp1.Name} & {fp2.Name}";
+
+        StateHasChanged();
+
+        // Notify parent
+        await OnTeamSelected.InvokeAsync(finalTeamId);
+
+        _isBusy = false;
+    }
+}

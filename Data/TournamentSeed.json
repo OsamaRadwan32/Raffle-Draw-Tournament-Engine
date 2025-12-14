@@ -1,0 +1,264 @@
+{
+  "Players": [
+    {
+      "Id": 1,
+      "Name": "Alaa Baassiri"
+    },
+    {
+      "Id": 2,
+      "Name": "Ali Al Akoum"
+    },
+    {
+      "Id": 3,
+      "Name": "Ali Sleem"
+    },
+    {
+      "Id": 4,
+      "Name": "Ali Swaydan"
+    },
+    {
+      "Id": 5,
+      "Name": "Baraa Hariri"
+    },
+    {
+      "Id": 6,
+      "Name": "Bassam Baz"
+    },
+    {
+      "Id": 7,
+      "Name": "Bassem El Hajj"
+    },
+    {
+      "Id": 8,
+      "Name": "Carlos Kassis"
+    },
+    {
+      "Id": 9,
+      "Name": "Dory Mansour"
+    },
+    {
+      "Id": 10,
+      "Name": "Ghida Bsat"
+    },
+    {
+      "Id": 11,
+      "Name": "Hassan Baidoun"
+    },
+    {
+      "Id": 12,
+      "Name": "Hassan Hariri"
+    },
+    {
+      "Id": 13,
+      "Name": "Ibrahim Hleihel"
+    },
+    {
+      "Id": 14,
+      "Name": "Jamil Dimassi"
+    },
+    {
+      "Id": 15,
+      "Name": "Joseph Al Nachef"
+    },
+    {
+      "Id": 16,
+      "Name": "Joseph Juan"
+    },
+    {
+      "Id": 17,
+      "Name": "Khodor Ajour"
+    },
+    {
+      "Id": 18,
+      "Name": "Louis Tarabay"
+    },
+    {
+      "Id": 19,
+      "Name": "Maher Amaneddine"
+    },
+    {
+      "Id": 20,
+      "Name": "Mahmoud Hamwi"
+    },
+    {
+      "Id": 21,
+      "Name": "Mohamad Al Houssari"
+    },
+    {
+      "Id": 22,
+      "Name": "Mostafa Ismail"
+    },
+    {
+      "Id": 23,
+      "Name": "Mostafa Najdi"
+    },
+    {
+      "Id": 24,
+      "Name": "Osama Radwan"
+    },
+    {
+      "Id": 25,
+      "Name": "Peter Yamout"
+    },
+    {
+      "Id": 26,
+      "Name": "Rachad Khalifeh"
+    },
+    {
+      "Id": 27,
+      "Name": "Raed Abou Hadeer"
+    },
+    {
+      "Id": 28,
+      "Name": "Said Hage Ali"
+    },
+    {
+      "Id": 29,
+      "Name": "Shadi Shahabi"
+    },
+    {
+      "Id": 30,
+      "Name": "Yasser Shall"
+    },
+    {
+      "Id": 31,
+      "Name": "Yehia Al Kadiry"
+    },
+    {
+      "Id": 32,
+      "Name": "Youssef Hammoud"
+    },
+    {
+      "Id": 33,
+      "Name": "Zaher Al Sanea"
+    }
+  ],
+  "Teams": [
+    {
+      "Id": 1,
+      "Player1Id": 27,
+      "Player2Id": 13,
+      "Name": "Raed Abou Hadeer \u0026 Ibrahim Hleihel",
+      "Rank": 2
+    },
+    {
+      "Id": 2,
+      "Player1Id": 26,
+      "Player2Id": 3,
+      "Name": "Rachad Khalifeh \u0026 Ali Sleem",
+      "Rank": 2
+    },
+    {
+      "Id": 3,
+      "Player1Id": 5,
+      "Player2Id": 10,
+      "Name": "Baraa Hariri \u0026 Ghida Bsat",
+      "Rank": 2
+    },
+    {
+      "Id": 4,
+      "Player1Id": 16,
+      "Player2Id": 31,
+      "Name": "Joseph Juan \u0026 Yehia Al Kadiry",
+      "Rank": 1
+    },
+    {
+      "Id": 5,
+      "Player1Id": 8,
+      "Player2Id": 21,
+      "Name": "Carlos Kassis \u0026 Mohamad Al Houssari",
+      "Rank": 2
+    },
+    {
+      "Id": 6,
+      "Player1Id": 7,
+      "Player2Id": 2,
+      "Name": "Bassem El Hajj \u0026 Ali Al Akoum",
+      "Rank": 1
+    },
+    {
+      "Id": 7,
+      "Player1Id": 24,
+      "Player2Id": 4,
+      "Name": "Osama Radwan \u0026 Ali Swaydan",
+      "Rank": 1
+    },
+    {
+      "Id": 8,
+      "Player1Id": 33,
+      "Player2Id": 1,
+      "Name": "Zaher Al Sanea \u0026 Alaa Baassiri",
+      "Rank": 1
+    },
+    {
+      "Id": 9,
+      "Player1Id": 17,
+      "Player2Id": 28,
+      "Name": "Khodor Ajour \u0026 Said Hage Ali",
+      "Rank": 2
+    },
+    {
+      "Id": 10,
+      "Player1Id": 6,
+      "Player2Id": 22,
+      "Name": "Bassam Baz \u0026 Mostafa Ismail",
+      "Rank": 1
+    },
+    {
+      "Id": 11,
+      "Player1Id": 15,
+      "Player2Id": 29,
+      "Name": "Joseph Al Nachef \u0026 Shadi Shahabi",
+      "Rank": 2
+    },
+    {
+      "Id": 12,
+      "Player1Id": 30,
+      "Player2Id": 18,
+      "Name": "Yasser Shall \u0026 Louis Tarabay",
+      "Rank": 1
+    },
+    {
+      "Id": 13,
+      "Player1Id": 11,
+      "Player2Id": 9,
+      "Name": "Hassan Baidoun \u0026 Dory Mansour",
+      "Rank": 1
+    },
+    {
+      "Id": 14,
+      "Player1Id": 32,
+      "Player2Id": 19,
+      "Name": "Youssef Hammoud \u0026 Maher Amaneddine",
+      "Rank": 1
+    },
+    {
+      "Id": 15,
+      "Player1Id": 25,
+      "Player2Id": 12,
+      "Name": "Peter Yamout \u0026 Hassan Hariri",
+      "Rank": 2
+    }
+  ],
+  "Groups": [
+    {
+      "GroupName": "Group A",
+      "TeamIds": [
+        7
+      ]
+    },
+    {
+      "GroupName": "Group B",
+      "TeamIds": []
+    },
+    {
+      "GroupName": "Group C",
+      "TeamIds": []
+    },
+    {
+      "GroupName": "Group D",
+      "TeamIds": []
+    }
+  ],
+  "Knockout": []
+}
