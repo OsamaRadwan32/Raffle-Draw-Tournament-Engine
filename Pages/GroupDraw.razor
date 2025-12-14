@@ -1,84 +1,104 @@
 @page "/groups/draw"
+@using Microsoft.Extensions.Logging
 @using PadelTournamentApp.Models
 @using PadelTournamentApp.Data
 @using PadelTournamentApp.Components.Draw
 @inject SeedService SeedData
 @inject NavigationManager Nav
+@inject ILogger<GroupDraw> Logger
 
 <h2 class="page-title">Group Draw</h2>
 
 <div class="page-center">
 
-@if (!teamsReady)
-{
-    <p class="empty">You must create teams before generating the group draw.</p>
-    <button class="btn-add" @onclick="GoToTeams">Go to Teams</button>
-}
-else
-{
-    <!-- REMAINING TEAMS -->
-    <div class="remaining-container">
-        <h3 class="section-title">
-            Teams Remaining: @allRemainingTeams.Count
-        </h3>
+    @if (!teamsReady)
+    {
+        <p class="empty">You must create teams before generating the group draw.</p>
+        <button class="btn-add" @onclick="GoToTeams">Go to Teams</button>
+    }
+    else
+    {
+        <!-- REMAINING TEAMS -->
+        <div class="remaining-container">
+            <h3 class="section-title">
+                Teams Remaining: @allRemainingTeams.Count
+            </h3>
 
-        <div class="remaining-grid">
-            @foreach (var tid in allRemainingTeams)
+            <div class="remaining-grid">
+                @foreach (var tid in allRemainingTeams)
+                {
+                    var t = SeedData.Teams.FirstOrDefault(x => x.Id == tid);
+                    var p1 = t == null ? null : SeedData.Players.FirstOrDefault(p => p.Id == t.Player1Id);
+                    var p2 = t == null ? null : SeedData.Players.FirstOrDefault(p => p.Id == t.Player2Id);
+
+                    if (t == null || p1 == null || p2 == null)
+                    {
+                        Logger?.LogWarning(
+                        "[GroupDraw] Skipping remaining team id {TeamId} (team found: {HasTeam}, p1: {P1}, p2: {P2})",
+                        tid,
+                        t != null,
+                        t?.Player1Id,
+                        t?.Player2Id);
+                        continue;
+                    }
+
+                    <div class="team-box">
+                        @p1.Name & @p2.Name
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- DRAW BOX -->
+        <TeamDrawBox @ref="drawBox" OnTeamSelected="HandleTeamSelected" />
+
+        <!-- CONTROLS -->
+        <div class="draw-controls">
+            <button class="btn-draw" @onclick="BeginShuffle" disabled="@(!canDraw)">
+                Draw Team
+            </button>
+
+            <button class="btn-reset" @onclick="ResetDraw">
+                Reset Draw
+            </button>
+        </div>
+
+        <p class="status">@statusMessage</p>
+
+        <!-- GROUPS -->
+        <div class="groups-container">
+            @for (int i = 0; i < Groups.Count; i++)
             {
-                var t = SeedData.Teams.First(x => x.Id == tid);
-                var p1 = SeedData.Players.First(p => p.Id == t.Player1Id);
-                var p2 = SeedData.Players.First(p => p.Id == t.Player2Id);
+                var g = Groups[i];
 
-                <div class="team-box">
-                    @p1.Name & @p2.Name
+                <div class="group-card @(highlightedGroupIndex == i ? "group-highlight" : "")">
+                    <h3>@g.GroupName</h3>
+
+                    <ul>
+                        @foreach (var tid in g.TeamIds)
+                        {
+                            var t = SeedData.Teams.FirstOrDefault(t => t.Id == tid);
+                            var p1 = t == null ? null : SeedData.Players.FirstOrDefault(p => p.Id == t.Player1Id);
+                            var p2 = t == null ? null : SeedData.Players.FirstOrDefault(p => p.Id == t.Player2Id);
+
+                            if (t == null || p1 == null || p2 == null)
+                            {
+                                Logger?.LogWarning(
+                                "[GroupDraw] Skipping group render for team id {TeamId} (team found: {HasTeam}, p1: {P1}, p2: {P2})",
+                                tid,
+                                t != null,
+                                t?.Player1Id,
+                                t?.Player2Id);
+                                continue;
+                            }
+
+                            <li>@p1.Name & @p2.Name</li>
+                        }
+                    </ul>
                 </div>
             }
         </div>
-    </div>
-
-    <!-- DRAW BOX -->
-    <TeamDrawBox @ref="drawBox"
-                OnTeamSelected="HandleTeamSelected" />
-
-    <!-- CONTROLS -->
-    <div class="draw-controls">
-        <button class="btn-draw"
-                @onclick="BeginShuffle"
-                disabled="@(!canDraw)">
-            Draw Team
-        </button>
-
-        <button class="btn-reset"
-                @onclick="ResetDraw">
-            Reset Draw
-        </button>
-    </div>
-
-    <p class="status">@statusMessage</p>
-
-    <!-- GROUPS -->
-    <div class="groups-container">
-        @for (int i = 0; i < Groups.Count; i++)
-        {
-            var g = Groups[i];
-
-            <div class="group-card @(highlightedGroupIndex == i ? "group-highlight" : "")">
-                <h3>@g.GroupName</h3>
-
-                <ul>
-                    @foreach (var tid in g.TeamIds)
-                    {
-                        var t = SeedData.Teams.First(t => t.Id == tid);
-                        var p1 = SeedData.Players.First(p => p.Id == t.Player1Id);
-                        var p2 = SeedData.Players.First(p => p.Id == t.Player2Id);
-
-                        <li>@p1.Name & @p2.Name</li>
-                    }
-                </ul>
-            </div>
-        }
-    </div>
-}
+    }
 
 </div>
 
@@ -103,26 +123,26 @@ else
         if (!teamsReady) return;
 
         Groups = SeedData.Groups.Count > 0
-            ? SeedData.Groups
-            : CreateGroups();
+        ? SeedData.Groups
+        : CreateGroups();
 
         rankedPools = SeedData.Teams
-            .GroupBy(t => t.Rank)
-            .OrderBy(g => g.Key)
-            .ToDictionary(g => g.Key, g => g.Select(t => t.Id).ToList());
+        .GroupBy(t => t.Rank)
+        .OrderBy(g => g.Key)
+        .ToDictionary(g => g.Key, g => g.Select(t => t.Id).ToList());
 
         var assigned = Groups.SelectMany(g => g.TeamIds).ToHashSet();
 
         allRemainingTeams = SeedData.Teams
-            .Where(t => !assigned.Contains(t.Id))
-            .Select(t => t.Id)
-            .ToList();
+        .Where(t => !assigned.Contains(t.Id))
+        .Select(t => t.Id)
+        .ToList();
 
         currentRank = allRemainingTeams.Count > 0
-            ? SeedData.Teams
-                .Where(t => allRemainingTeams.Contains(t.Id))
-                .Min(t => t.Rank)
-            : rankedPools.Keys.Max();
+        ? SeedData.Teams
+        .Where(t => allRemainingTeams.Contains(t.Id))
+        .Min(t => t.Rank)
+        : rankedPools.Keys.Max();
 
         LoadNextRankPool();
     }
@@ -160,8 +180,8 @@ else
         var assigned = Groups.SelectMany(g => g.TeamIds).ToHashSet();
 
         remainingRankPool = rankedPools[currentRank]
-            .Where(id => !assigned.Contains(id))
-            .ToList();
+        .Where(id => !assigned.Contains(id))
+        .ToList();
 
         if (remainingRankPool.Count == 0)
         {
@@ -191,30 +211,31 @@ else
 
     private async Task HandleTeamSelected(int teamId)
     {
+        // Determine group
         int totalAssigned = Groups.Sum(g => g.TeamIds.Count);
         int groupIndex = totalAssigned % Groups.Count;
 
+        // Mutate state (pure data changes only)
         Groups[groupIndex].TeamIds.Add(teamId);
-
         remainingRankPool.Remove(teamId);
         allRemainingTeams.Remove(teamId);
 
-        SeedData.Save();
-
         highlightedGroupIndex = groupIndex;
+
+        // Allow highlight to be visible
         await Task.Delay(400);
+
         highlightedGroupIndex = -1;
 
+        // Move to next rank if needed
         if (remainingRankPool.Count == 0)
         {
             currentRank++;
             LoadNextRankPool();
         }
 
-        StateHasChanged();
-
-        // Refresh the page after saving to avoid hydration overlays
-        Nav.NavigateTo("/groups/draw", forceLoad: true);
+        // Persist AFTER everything is stable
+        await SeedData.SaveAsync();
     }
 
     private void ResetDraw()

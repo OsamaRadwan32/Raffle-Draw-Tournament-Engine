@@ -100,6 +100,25 @@ public sealed class SeedService
         }
     }
 
+    public async Task SaveAsync()
+    {
+        var seed = new SeedFile
+        {
+            Players = Players,
+            Teams = Teams,
+            Groups = Groups,
+            Knockout = Knockout
+        };
+
+        var json = JsonSerializer.Serialize(seed, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+
+        await File.WriteAllTextAsync(FilePath, json);
+    }
+
+
     private void ResetState()
     {
         Players = new();

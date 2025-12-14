@@ -249,7 +249,9 @@
     },
     {
       "GroupName": "Group B",
-      "TeamIds": []
+      "TeamIds": [
+        13
+      ]
     },
     {
       "GroupName": "Group C",
