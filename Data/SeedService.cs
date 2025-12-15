@@ -136,10 +136,3 @@ public class SeedFile
     public List<KnockoutMatch> Knockout { get; set; } = new();
 }
 
-public class KnockoutMatch
-{
-    public int Id { get; set; }
-    public int TeamA { get; set; }
-    public int TeamB { get; set; }
-    public string Stage { get; set; } = string.Empty;
-}

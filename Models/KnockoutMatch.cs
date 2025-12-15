@@ -1,8 +1,9 @@
 namespace PadelTournamentApp.Models;
 
-public class KnockoutMatchView
+public class KnockoutMatch
 {
-    public string MatchName { get; set; } = "";
-    public string SideA { get; set; } = ""; // e.g. "Winner Group A"
-    public string SideB { get; set; } = ""; // e.g. "Runner-up Group C"
+    public string Label { get; set; } = "";
+    public string Stage { get; set; } = "";
+    public string SideA { get; set; } = "";
+    public string SideB { get; set; } = "";
 }

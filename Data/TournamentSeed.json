@@ -244,9 +244,9 @@
     {
       "GroupName": "Group A",
       "TeamIds": [
+        6,
         7,
-        4,
-        5,
+        1,
         3
       ]
     },
@@ -254,28 +254,65 @@
       "GroupName": "Group B",
       "TeamIds": [
         13,
-        12,
-        2,
+        4,
+        11,
         15
       ]
     },
     {
       "GroupName": "Group C",
       "TeamIds": [
-        10,
-        6,
-        1,
-        9
+        12,
+        8,
+        2,
+        5
       ]
     },
     {
       "GroupName": "Group D",
       "TeamIds": [
+        10,
         14,
-        8,
-        11
+        9
       ]
     }
   ],
-  "Knockout": []
+  "Knockout": [
+    {
+      "Label": "Quarter Final 1",
+      "Stage": "QuarterFinal",
+      "SideA": "Winner Group D",
+      "SideB": "Runner-up Group B"
+    },
+    {
+      "Label": "Quarter Final 2",
+      "Stage": "QuarterFinal",
+      "SideA": "Winner Group C",
+      "SideB": "Runner-up Group D"
+    },
+    {
+      "Label": "Quarter Final 3",
+      "Stage": "QuarterFinal",
+      "SideA": "Winner Group B",
+      "SideB": "Runner-up Group A"
+    },
+    {
+      "Label": "Quarter Final 4",
+      "Stage": "QuarterFinal",
+      "SideA": "Winner Group A",
+      "SideB": "Runner-up Group C"
+    },
+    {
+      "Label": "Semi Final 1",
+      "Stage": "SemiFinal",
+      "SideA": "Winner of Quarter Final 2",
+      "SideB": "Winner of Quarter Final 1"
+    },
+    {
+      "Label": "Semi Final 2",
+      "Stage": "SemiFinal",
+      "SideA": "Winner of Quarter Final 4",
+      "SideB": "Winner of Quarter Final 3"
+    }
+  ]
 }

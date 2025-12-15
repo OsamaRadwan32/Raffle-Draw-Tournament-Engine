@@ -117,6 +117,9 @@
     private int highlightedGroupIndex = -1;
     private string statusMessage = string.Empty;
 
+    // BACKEND-ONLY FLAG (no UI)
+    private const bool AUTO_DRAW_ALL = true;
+
     protected override void OnInitialized()
     {
         teamsReady = SeedData.Teams.Count >= 2;
@@ -194,7 +197,7 @@
         statusMessage = string.Empty;
     }
 
-    private async Task BeginShuffle()
+    @* private async Task BeginShuffle()
     {
         if (drawBox == null || remainingRankPool.Count == 0)
             return;
@@ -207,6 +210,51 @@
 
         statusMessage = "Drawing...";
         await drawBox.StartDraw(remainingRankPool);
+    } *@
+
+    @* Auto Shuffling all the teams *@
+    private async Task BeginShuffle()
+    {
+        if (drawBox == null || !canDraw)
+            return;
+
+        statusMessage = "Drawing...";
+
+        if (!AUTO_DRAW_ALL)
+        {
+            // 🔹 Existing behavior (single draw)
+            if (remainingRankPool.Count == 1)
+            {
+                await HandleTeamSelected(remainingRankPool[0]);
+                return;
+            }
+
+            await drawBox.StartDraw(remainingRankPool);
+            return;
+        }
+
+        // 🔥 AUTO-DRAW MODE
+        while (canDraw)
+        {
+            // Defensive check
+            if (remainingRankPool.Count == 0)
+                break;
+
+            // Single team → assign directly
+            if (remainingRankPool.Count == 1)
+            {
+                await HandleTeamSelected(remainingRankPool[0]);
+            }
+            else
+            {
+                await drawBox.StartDraw(remainingRankPool);
+            }
+
+            // ⏱ Small pause so spectators can follow
+            await Task.Delay(600);
+        }
+
+        statusMessage = "All teams drawn";
     }
 
     private async Task HandleTeamSelected(int teamId)
@@ -243,7 +291,7 @@
         Groups = CreateGroups();
         currentRank = rankedPools.Keys.Min();
         LoadNextRankPool();
-        Nav.NavigateTo("/groups/draw", true);
+        Nav.NavigateTo("/groups", true);
     }
 
     private void GoToTeams() => Nav.NavigateTo("/teams", true);

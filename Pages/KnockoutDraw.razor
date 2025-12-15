@@ -1,5 +1,4 @@
 @page "/knockout"
-@using PadelTournamentApp.Models
 @using PadelTournamentApp.Data
 @inject SeedService SeedData
 
@@ -7,7 +6,7 @@
 
 <div class="knockout-layout">
 
-    <!-- LEFT: GROUPS -->
+    <!-- LEFT: GROUPS (spectator only) -->
     <aside class="groups-panel">
         <h3>Groups</h3>
 
@@ -18,8 +17,11 @@
                 <ul>
                     @foreach (var tid in g.TeamIds)
                     {
-                        var t = SeedData.Teams.First(x => x.Id == tid);
-                        <li>@t.Name</li>
+                        var t = SeedData.Teams.FirstOrDefault(x => x.Id == tid);
+                        if (t != null)
+                        {
+                            <li>@t.Name</li>
+                        }
                     }
                 </ul>
             </div>
@@ -31,43 +33,77 @@
 
         @if (!isReady)
         {
-            <p class="empty">Groups must be completed before knockout draw.</p>
+            <p class="empty">@notReadyMessage</p>
         }
         else
         {
             <h3 class="section-title">@CurrentStepTitle</h3>
 
-            <!-- RAFFLE DISPLAY -->
+            @* <div class="current-seed">
+                <span class="seed-label">Current Draw:</span>
+                <span class="seed-value">@currentSeed</span>
+            </div> *@
+
             <div class="raffle-box">
-                @if (isShuffling)
-                {
-                    <span class="shuffle-text">@shuffleText</span>
-                }
-                else
-                {
-                    <span class="placeholder">Press Draw</span>
-                }
+                <span class="shuffle-text">
+                    @(isShuffling? shuffleText : "Press Draw")
+                </span>
             </div>
 
-            <!-- CONTROLS -->
             <div class="draw-controls">
-                <button class="btn-draw" @onclick="DrawNext"
-                    disabled="@isShuffling || CurrentStep == KnockoutStep.Completed">
+                <button class="btn-draw" @onclick="DrawNext">
                     Draw
+                </button>
+
+                <button class="btn-reset" @onclick="ResetKnockout" disabled="@isShuffling">
+                    Reset Knockout
                 </button>
             </div>
 
-            <!-- MATCHES -->
             <div class="matches">
-                @foreach (var m in CurrentMatches)
+
+                @if (SeedData.Knockout.Any(m => m.Stage == "QuarterFinal"))
                 {
-                    <div class="match-card">
-                        <div>@m.SideA</div>
-                        <strong>vs</strong>
-                        <div>@m.SideB</div>
-                    </div>
+                    <h4 class="matches-stage">Quarter Finals</h4>
+
+                    @foreach (var m in SeedData.Knockout.Where(m => m.Stage == "QuarterFinal"))
+                    {
+                        <div class="match-card">
+                            <div class="match-title">@m.Label</div>
+
+                            <div class="match-separator"></div>
+
+                            <div class="match-sides">
+                                <span>@m.SideA</span>
+                                <strong>vs</strong>
+                                <span>@m.SideB</span>
+                            </div>
+                        </div>
+                    }
                 }
+
+                @if (SeedData.Knockout.Any(m => m.Stage == "SemiFinal"))
+                {
+                    <h4 class="matches-stage">Semi Finals</h4>
+
+                    @foreach (var m in SeedData.Knockout.Where(m => m.Stage == "SemiFinal"))
+                    {
+                        <div class="match-card">
+                            <div class="match-title">@m.Label</div>
+
+                            <div class="match-separator"></div>
+
+                            <div class="match-sides">
+                                <span>@m.SideA</span>
+                                <strong>vs</strong>
+                                <span>@m.SideB</span>
+                            </div>
+                        </div>
+                    }
+                }
+
             </div>
+
         }
 
     </section>
@@ -76,7 +112,7 @@
 
 @code {
 
-    enum KnockoutStep
+    private enum KnockoutStep
     {
         QuarterFinals,
         SemiFinals,
@@ -86,121 +122,227 @@
     private KnockoutStep CurrentStep = KnockoutStep.QuarterFinals;
 
     private bool isReady;
-    private bool isShuffling = false;
+    private bool isShuffling;
     private string shuffleText = "";
+    private string currentSeed = "";
+    private string notReadyMessage = "At least 2 groups are required.";
 
-    private List<string> leaders = new();
-    private List<string> runnersUp = new();
-    private List<string> semiCandidates = new();
+    private readonly Random rnd = new();
 
-    private List<KnockoutMatchView> QuarterFinals = new();
-    private List<KnockoutMatchView> SemiFinals = new();
+    // Quarter Final pools
+    private List<string> qfLeaders = new();
+    private List<string> qfRunners = new();
 
-    private IEnumerable<KnockoutMatchView> CurrentMatches =>
-    CurrentStep == KnockoutStep.QuarterFinals ? QuarterFinals :
-    CurrentStep == KnockoutStep.SemiFinals ? SemiFinals :
-    Enumerable.Empty<KnockoutMatchView>();
+    // Semi Final pool
+    private List<string> sfSeeds = new();
+
+    protected override void OnInitialized()
+    {
+        if (SeedData.Groups == null || SeedData.Groups.Count < 2)
+        {
+            isReady = false;
+            return;
+        }
+
+        isReady = true;
+
+        var groupNames = SeedData.Groups
+        .Select(g => g.GroupName.Trim())
+        .Where(n => !string.IsNullOrWhiteSpace(n))
+        .Distinct()
+        .OrderBy(n => n)
+        .ToList();
+
+        qfLeaders = groupNames.Select(n => $"Winner {n}").ToList();
+        qfRunners = groupNames.Select(n => $"Runner-up {n}").ToList();
+
+        Shuffle(qfLeaders);
+        Shuffle(qfRunners);
+
+        SeedData.Knockout ??= new();
+
+        if (SeedData.Knockout.Any(m => m.Stage == "SemiFinal"))
+        {
+            CurrentStep = KnockoutStep.Completed;
+        }
+        else if (SeedData.Knockout.Any(m => m.Stage == "QuarterFinal"))
+        {
+            MoveToSemiFinals();
+        }
+
+        UpdateCurrentSeed();
+    }
 
     private string CurrentStepTitle =>
     CurrentStep == KnockoutStep.QuarterFinals ? "Quarter-Final Draw" :
     CurrentStep == KnockoutStep.SemiFinals ? "Semi-Final Draw" :
     "Draw Completed";
 
-    protected override void OnInitialized()
-    {
-        if (SeedData.Groups.Count < 2 || SeedData.Groups.Any(g => g.TeamIds.Count < 2))
-            return;
-
-        isReady = true;
-
-        leaders = SeedData.Groups
-        .Select(g => $"Winner {g.GroupName}")
-        .ToList();
-
-        runnersUp = SeedData.Groups
-        .Select(g => $"Runner-up {g.GroupName}")
-        .ToList();
-    }
-
     private async Task DrawNext()
     {
+        // HARD GUARDS (no UI lockups)
+        if (!isReady)
+        {
+            shuffleText = "Knockout not ready";
+            StateHasChanged();
+            return;
+        }
+
+        if (isShuffling)
+            return;
+
+        if (CurrentStep == KnockoutStep.Completed)
+        {
+            shuffleText = "Draw completed";
+            StateHasChanged();
+            return;
+        }
+
         isShuffling = true;
         shuffleText = "";
+        StateHasChanged();
 
-        var rnd = new Random();
-
-        // Visual shuffle
-        for (int i = 0; i < 18; i++)
+        try
         {
             if (CurrentStep == KnockoutStep.QuarterFinals)
             {
-                shuffleText =
-                $"{leaders[rnd.Next(leaders.Count)]} vs {runnersUp[rnd.Next(runnersUp.Count)]}";
+                await DrawQuarterFinal();
             }
-            else
+            else if (CurrentStep == KnockoutStep.SemiFinals)
             {
-                shuffleText =
-                $"{semiCandidates[rnd.Next(semiCandidates.Count)]} vs {semiCandidates[rnd.Next(semiCandidates.Count)]}";
+                await DrawSemiFinal();
             }
 
-            await Task.Delay(90);
+            await Persist();
+            UpdateCurrentSeed();
         }
-
-        isShuffling = false;
-
-        if (CurrentStep == KnockoutStep.QuarterFinals)
-            DrawQuarterFinal(rnd);
-        else if (CurrentStep == KnockoutStep.SemiFinals)
-            DrawSemiFinal(rnd);
+        finally
+        {
+            isShuffling = false;
+            StateHasChanged();
+        }
     }
 
-    private void DrawQuarterFinal(Random rnd)
-    {
-        var leader = leaders[rnd.Next(leaders.Count)];
 
-        var leaderGroup = leader.Split(' ').Last();
-        var validRunners = runnersUp
+    private async Task DrawQuarterFinal()
+    {
+        if (qfLeaders.Count == 0)
+        {
+            MoveToSemiFinals();
+            return;
+        }
+
+        var leader = qfLeaders[rnd.Next(qfLeaders.Count)];
+        var leaderGroup = leader.Replace("Winner ", "");
+
+        var eligibleRunners = qfRunners
         .Where(r => !r.Contains(leaderGroup))
         .ToList();
 
-        var runner = validRunners[rnd.Next(validRunners.Count)];
+        if (!eligibleRunners.Any())
+            eligibleRunners = qfRunners.ToList();
 
-        leaders.Remove(leader);
-        runnersUp.Remove(runner);
-
-        QuarterFinals.Add(new KnockoutMatchView
+        for (int i = 0; i < 16; i++)
         {
+            shuffleText = $"{leader} vs {eligibleRunners[rnd.Next(eligibleRunners.Count)]}";
+            StateHasChanged();
+            await Task.Delay(90);
+        }
+
+        var opponent = eligibleRunners[rnd.Next(eligibleRunners.Count)];
+
+        SeedData.Knockout.Add(new KnockoutMatch
+        {
+            Label = $"Quarter Final {SeedData.Knockout.Count(m => m.Stage == "QuarterFinal") + 1}",
+            Stage = "QuarterFinal",
             SideA = leader,
-            SideB = runner
+            SideB = opponent
         });
 
-        semiCandidates.Add($"Winner of {leader} vs {runner}");
+        qfLeaders.Remove(leader);
+        qfRunners.Remove(opponent);
 
-        if (leaders.Count == 0)
-            CurrentStep = KnockoutStep.SemiFinals;
+        if (qfLeaders.Count == 0)
+            MoveToSemiFinals();
     }
 
-    private void DrawSemiFinal(Random rnd)
+    private async Task DrawSemiFinal()
     {
-        var a = semiCandidates[rnd.Next(semiCandidates.Count)];
-        semiCandidates.Remove(a);
-
-        var b = semiCandidates[rnd.Next(semiCandidates.Count)];
-        semiCandidates.Remove(b);
-
-        SemiFinals.Add(new KnockoutMatchView
+        if (sfSeeds.Count < 2)
         {
+            CurrentStep = KnockoutStep.Completed;
+            return;
+        }
+
+        var a = sfSeeds[rnd.Next(sfSeeds.Count)];
+        sfSeeds.Remove(a);
+
+        var b = sfSeeds[rnd.Next(sfSeeds.Count)];
+        sfSeeds.Remove(b);
+
+        for (int i = 0; i < 16; i++)
+        {
+            shuffleText = $"{a} vs {b}";
+            StateHasChanged();
+            await Task.Delay(90);
+        }
+
+        SeedData.Knockout.Add(new KnockoutMatch
+        {
+            Label = $"Semi Final {SeedData.Knockout.Count(m => m.Stage == "SemiFinal") + 1}",
+            Stage = "SemiFinal",
             SideA = a,
             SideB = b
         });
 
-        if (semiCandidates.Count == 0)
+        if (sfSeeds.Count == 0)
             CurrentStep = KnockoutStep.Completed;
     }
 
-    class KnockoutMatchView
+    private void MoveToSemiFinals()
     {
-        public string SideA { get; set; } = "";
-        public string SideB { get; set; } = "";
+        CurrentStep = KnockoutStep.SemiFinals;
+
+        sfSeeds = Enumerable.Range(1, SeedData.Knockout.Count(m => m.Stage == "QuarterFinal"))
+        .Select(i => $"Winner of Quarter Final {i}")
+        .ToList();
+
+        Shuffle(sfSeeds);
+    }
+
+    private void UpdateCurrentSeed()
+    {
+        currentSeed =
+        CurrentStep == KnockoutStep.QuarterFinals && qfLeaders.Any()
+        ? qfLeaders[rnd.Next(qfLeaders.Count)]
+        : CurrentStep == KnockoutStep.SemiFinals && sfSeeds.Any()
+        ? sfSeeds[rnd.Next(sfSeeds.Count)]
+        : "Completed";
+    }
+
+    private async Task Persist()
+    {
+        if (SeedData.GetType().GetMethod("SaveAsync") != null)
+            await SeedData.SaveAsync();
+        else
+            SeedData.Save();
+    }
+
+    private async Task ResetKnockout()
+    {
+        SeedData.Knockout.Clear();
+        CurrentStep = KnockoutStep.QuarterFinals;
+        OnInitialized();
+        await Persist();
+        StateHasChanged();
+    }
+
+    private void Shuffle<T>(IList<T> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = rnd.Next(i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
     }
 }
