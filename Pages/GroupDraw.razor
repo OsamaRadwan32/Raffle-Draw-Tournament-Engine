@@ -7,7 +7,9 @@
 @inject NavigationManager Nav
 @inject ILogger<GroupDraw> Logger
 
-<h2 class="page-title">Group Draw</h2>
+<div class="page-header-card">
+    <h2 class="page-title">Group Draw</h2>
+</div>
 
 <div class="page-center">
 
@@ -18,53 +20,6 @@
     }
     else
     {
-        <!-- REMAINING TEAMS -->
-        <div class="remaining-container">
-            <h3 class="section-title">
-                Teams Remaining: @allRemainingTeams.Count
-            </h3>
-
-            <div class="remaining-grid">
-                @foreach (var tid in allRemainingTeams)
-                {
-                    var t = SeedData.Teams.FirstOrDefault(x => x.Id == tid);
-                    var p1 = t == null ? null : SeedData.Players.FirstOrDefault(p => p.Id == t.Player1Id);
-                    var p2 = t == null ? null : SeedData.Players.FirstOrDefault(p => p.Id == t.Player2Id);
-
-                    if (t == null || p1 == null || p2 == null)
-                    {
-                        Logger?.LogWarning(
-                        "[GroupDraw] Skipping remaining team id {TeamId} (team found: {HasTeam}, p1: {P1}, p2: {P2})",
-                        tid,
-                        t != null,
-                        t?.Player1Id,
-                        t?.Player2Id);
-                        continue;
-                    }
-
-                    <div class="team-box">
-                        @p1.Name & @p2.Name
-                    </div>
-                }
-            </div>
-        </div>
-
-        <!-- DRAW BOX -->
-        <TeamDrawBox @ref="drawBox" OnTeamSelected="HandleTeamSelected" />
-
-        <!-- CONTROLS -->
-        <div class="draw-controls">
-            <button class="btn-draw" @onclick="BeginShuffle" disabled="@(!canDraw)">
-                Draw Team
-            </button>
-
-            <button class="btn-reset" @onclick="ResetDraw">
-                Reset Draw
-            </button>
-        </div>
-
-        <p class="status">@statusMessage</p>
-
         <!-- GROUPS -->
         <div class="groups-container">
             @for (int i = 0; i < Groups.Count; i++)
@@ -97,6 +52,53 @@
                     </ul>
                 </div>
             }
+        </div>
+
+        <!-- DRAW BOX -->
+        <TeamDrawBox @ref="drawBox" OnTeamSelected="HandleTeamSelected" />
+
+        <!-- CONTROLS -->
+        <div class="draw-controls">
+            <button class="btn-draw" @onclick="BeginShuffle" disabled="@(!canDraw)">
+                Draw Team
+            </button>
+
+            <button class="btn-reset" @onclick="ResetDraw">
+                Reset Draw
+            </button>
+        </div>
+
+        @* <p class="status">@statusMessage</p> *@
+
+        <!-- REMAINING TEAMS -->
+        <div class="remaining-container">
+            <h3 class="section-title">
+                Teams Remaining: @allRemainingTeams.Count
+            </h3>
+
+            <div class="remaining-grid">
+                @foreach (var tid in allRemainingTeams)
+                {
+                    var t = SeedData.Teams.FirstOrDefault(x => x.Id == tid);
+                    var p1 = t == null ? null : SeedData.Players.FirstOrDefault(p => p.Id == t.Player1Id);
+                    var p2 = t == null ? null : SeedData.Players.FirstOrDefault(p => p.Id == t.Player2Id);
+
+                    if (t == null || p1 == null || p2 == null)
+                    {
+                        Logger?.LogWarning(
+                        "[GroupDraw] Skipping remaining team id {TeamId} (team found: {HasTeam}, p1: {P1}, p2: {P2})",
+                        tid,
+                        t != null,
+                        t?.Player1Id,
+                        t?.Player2Id);
+                        continue;
+                    }
+
+                    <div class="team-box">
+                        @p1.Name & @p2.Name
+                    </div>
+                }
+            </div>
         </div>
     }
 
@@ -197,7 +199,7 @@
         statusMessage = string.Empty;
     }
 
-    @* private async Task BeginShuffle()
+    private async Task BeginShuffle()
     {
         if (drawBox == null || remainingRankPool.Count == 0)
             return;
@@ -210,10 +212,10 @@
 
         statusMessage = "Drawing...";
         await drawBox.StartDraw(remainingRankPool);
-    } *@
+    }
 
     @* Auto Shuffling all the teams *@
-    private async Task BeginShuffle()
+    @* private async Task BeginShuffle()
     {
         if (drawBox == null || !canDraw)
             return;
@@ -255,7 +257,7 @@
         }
 
         statusMessage = "All teams drawn";
-    }
+    } *@
 
     private async Task HandleTeamSelected(int teamId)
     {

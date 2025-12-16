@@ -226,54 +226,44 @@
       "Rank": 1
     },
     {
-      "Id": 14,
-      "Player1Id": 32,
-      "Player2Id": 19,
-      "Name": "Youssef Hammoud \u0026 Maher Amaneddine",
-      "Rank": 1
-    },
-    {
       "Id": 15,
       "Player1Id": 25,
       "Player2Id": 12,
       "Name": "Peter Yamout \u0026 Hassan Hariri",
       "Rank": 2
+    },
+    {
+      "Id": 16,
+      "Player1Id": 32,
+      "Player2Id": 19,
+      "Name": "Youssef Hammoud \u0026 Maher Amaneddine",
+      "Rank": 0
     }
   ],
   "Groups": [
     {
       "GroupName": "Group A",
       "TeamIds": [
-        6,
-        7,
-        1,
-        3
+        16,
+        6
       ]
     },
     {
       "GroupName": "Group B",
       "TeamIds": [
-        13,
-        4,
-        11,
-        15
+        4
       ]
     },
     {
       "GroupName": "Group C",
       "TeamIds": [
-        12,
-        8,
-        2,
-        5
+        10
       ]
     },
     {
       "GroupName": "Group D",
       "TeamIds": [
-        10,
-        14,
-        9
+        8
       ]
     }
   ],

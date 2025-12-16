@@ -43,7 +43,7 @@
         StateHasChanged();
 
         // Shuffle animation (controlled rendering)
-        for (int i = 0; i < 120; i++)
+        for (int i = 0; i < 90; i++)
         {
             var id = remainingTeamIds[_rand.Next(remainingTeamIds.Count)];
             var team = SeedData.Teams.First(t => t.Id == id);
@@ -57,7 +57,7 @@
             if (i % 2 == 0)
                 StateHasChanged();
 
-            await Task.Delay(35);
+            await Task.Delay(25);
         }
 
         // Final selection

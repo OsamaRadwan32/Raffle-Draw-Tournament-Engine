@@ -2,50 +2,49 @@
 @inject SeedService SeedData
 @inject NavigationManager Nav
 
-<h2 class="page-title">Register Players</h2>
-
-<div class="player-form">
-    <input type="text"
-           @bind="newPlayerName"
-           placeholder="Enter player name"
-           class="input-text" />
-
-    <button type="button" class="btn-add" @onclick="AddPlayer">Add Player</button>
+<div class="page-header-card">
+    <h2 class="page-title">Player Registration</h2>
 </div>
 
-@if (!string.IsNullOrEmpty(statusMessage))
-{
-    <p class="@statusClass">@statusMessage</p>
-}
+<div class="page-card">
 
-@if (SeedData.Players.Count == 0)
-{
-    <p class="empty">No players registered yet.</p>
-}
-else
-{
-    <div class="players-list">
-        <table class="players-table">
-            <thead>
-                <tr>
-                    <th style="text-align:left">Name</th>
-                    <th style="width:50px"></th>
-                </tr>
-            </thead>
-            <tbody>
+    <div class="player-form">
+        <input type="text" @bind="newPlayerName" placeholder="Enter player name" class="input-text" />
+
+        <button type="button" class="btn-add" @onclick="AddPlayer">
+            Add Player
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <p class="status-message @statusClass">@statusMessage</p>
+    }
+
+    @if (SeedData.Players.Count == 0)
+    {
+        <p class="empty">No players registered yet.</p>
+    }
+    else
+    {
+        <div class="players-list">
+            <div class="players-grid">
                 @foreach (var player in SeedData.Players)
                 {
-                    <tr>
-                        <td>@player.Name</td>
-                        <td>
-                            <button class="btn-delete" @onclick="() => DeletePlayer(player.Id)">✕</button>
-                        </td>
-                    </tr>
+                    <div class="player-card">
+                        <span class="player-name">@player.Name</span>
+
+                        <button class="btn-delete" title="Remove player" @onclick="() => DeletePlayer(player.Id)">
+                            ✕
+                        </button>
+                    </div>
                 }
-            </tbody>
-        </table>
-    </div>
-}
+            </div>
+        </div>
+
+    }
+
+</div>
 
 @code {
     private string newPlayerName = "";

@@ -2,66 +2,61 @@
 @inject SeedService SeedData
 @inject NavigationManager Nav
 
-<h2 class="page-title">Create Teams</h2>
-
-<div class="team-form">
-    <select @bind="selectedPlayer1" class="select-input">
-        <option value="">Select Player 1</option>
-        @foreach (var p in AvailablePlayersForTeam)
-        {
-            <option value="@p.Id">@p.Name</option>
-        }
-    </select>
-
-    <select @bind="selectedPlayer2" class="select-input">
-        <option value="">Select Player 2</option>
-        @foreach (var p in AvailablePlayersForTeam)
-        {
-            <option value="@p.Id">@p.Name</option>
-        }
-    </select>
-
-    <button class="btn-add" @onclick="AddTeam">Add Team</button>
+<div class="page-header-card">
+    <h2 class="page-title">Team Creation</h2>
 </div>
 
-@if (!string.IsNullOrEmpty(statusMessage))
-{
-    <p class="@statusClass">@statusMessage</p>
-}
+<div class="page-card">
 
-@if (SeedData.Teams.Count == 0)
-{
-    <p class="empty">No teams created yet.</p>
-}
-else
-{
-    <div class="teams-list">
-        <table class="teams-table">
-            <thead>
-                <tr>
-                    <th style="text-align:left">Team</th>
-                    <!-- <th style="text-align:left">Players</th> -->
-                    <th style="width:50px"></th>
-                </tr>
-            </thead>
-            <tbody>
+    <div class="team-form">
+        <select @bind="selectedPlayer1" class="select-input">
+            <option value="">Select Player 1</option>
+            @foreach (var p in AvailablePlayersForTeam)
+            {
+                <option value="@p.Id">@p.Name</option>
+            }
+        </select>
+
+        <select @bind="selectedPlayer2" class="select-input">
+            <option value="">Select Player 2</option>
+            @foreach (var p in AvailablePlayersForTeam)
+            {
+                <option value="@p.Id">@p.Name</option>
+            }
+        </select>
+
+        <button class="btn-add" @onclick="AddTeam">Add Team</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(statusMessage))
+    {
+        <p class="@statusClass">@statusMessage</p>
+    }
+
+    @if (SeedData.Teams.Count == 0)
+    {
+        <p class="empty">No teams created yet.</p>
+    }
+    else
+    {
+        <div class="teams-list">
+            <div class="teams-grid">
                 @foreach (var t in SeedData.Teams)
                 {
-                    var p1 = SeedData.Players.FirstOrDefault(x => x.Id == t.Player1Id);
-                    var p2 = SeedData.Players.FirstOrDefault(x => x.Id == t.Player2Id);
+                    <div class="team-card">
+                        <span class="team-name">@t.Name</span>
 
-                    <tr>
-                        <td>@t.Name</td>
-                        <!-- <td>@p1?.Name & @p2?.Name</td> -->
-                        <td>
-                            <button class="btn-delete" @onclick="() => DeleteTeam(t.Id)">✕</button>
-                        </td>
-                    </tr>
+                        <button class="btn-delete" title="Remove team" @onclick="() => DeleteTeam(t.Id)">
+                            ✕
+                        </button>
+                    </div>
                 }
-            </tbody>
-        </table>
-    </div>
-}
+            </div>
+        </div>
+
+    }
+</div>
+
 
 @code {
     private string selectedPlayer1 = "";
@@ -71,7 +66,7 @@ else
     private string statusClass = "";
 
     private IEnumerable<Player> AvailablePlayersForTeam =>
-        SeedData.Players.Where(p => !SeedData.Teams.Any(t => t.Player1Id == p.Id || t.Player2Id == p.Id));
+    SeedData.Players.Where(p => !SeedData.Teams.Any(t => t.Player1Id == p.Id || t.Player2Id == p.Id));
 
     private async Task AddTeam()
     {

@@ -1,0 +1,122 @@
+@page "/knockout/overview"
+@using PadelTournamentApp.Data
+@inject SeedService SeedData
+
+<div class="page-header-card">
+    <h2 class="page-title">Knockout Overview</h2>
+</div>
+
+<div class="knockout-layout">
+
+    <!-- LEFT: GROUPS (spectator only) -->
+    <aside class="groups-panel">
+        <h3>Groups</h3>
+
+        @foreach (var g in SeedData.Groups)
+        {
+            <div class="group-box">
+                <strong>@g.GroupName</strong>
+                <ul>
+                    @foreach (var tid in g.TeamIds)
+                    {
+                        var t = SeedData.Teams.FirstOrDefault(x => x.Id == tid);
+                        if (t != null)
+                        {
+                            <li>@t.Name</li>
+                        }
+                    }
+                </ul>
+            </div>
+        }
+    </aside>
+
+    <!-- CENTER: STATIC KNOCKOUT -->
+    <section class="draw-panel">
+
+        @if (SeedData.Groups.Count < 2)
+        {
+            <p class="empty">Groups are not available.</p>
+        }
+        else
+        {
+            <!-- QUARTER FINALS -->
+            <div class="matches">
+                <h4 class="matches-stage">Quarter Finals</h4>
+
+                @foreach (var m in GetQuarterFinals())
+                {
+                    <div class="match-card">
+                        <div class="match-left">
+                            <div class="match-title">@m.Label</div>
+                            <div class="match-sep"></div>
+                        </div>
+
+                        <div class="match-center">
+                            <div class="match-sides">
+                                <span>@m.SideA</span>
+                                <strong>vs</strong>
+                                <span>@m.SideB</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- SEMI FINALS -->
+            <div class="matches">
+                <h4 class="matches-stage">Semi Finals</h4>
+
+                @foreach (var m in GetSemiFinals())
+                {
+                    <div class="match-card">
+                        <div class="match-left">
+                            <div class="match-title">@m.Label</div>
+                            <div class="match-sep"></div>
+                        </div>
+
+                        <div class="match-center">
+                            <div class="match-sides">
+                                <span>@m.SideA</span>
+                                <strong>vs</strong>
+                                <span>@m.SideB</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </section>
+
+</div>
+
+@code {
+
+    private record StaticMatch(string Label, string SideA, string SideB);
+
+    private List<StaticMatch> GetQuarterFinals()
+    {
+        var groups = SeedData.Groups
+        .Select(g => g.GroupName)
+        .OrderBy(g => g)
+        .ToList();
+
+        // Assumes Group A, B, C, D (extendable)
+        return new()
+{
+new("Quarter Final 1", $"Winner {groups[0]}", $"Runner-up {groups[1]}"),
+new("Quarter Final 2", $"Winner {groups[1]}", $"Runner-up {groups[0]}"),
+new("Quarter Final 3", $"Winner {groups[2]}", $"Runner-up {groups[3]}"),
+new("Quarter Final 4", $"Winner {groups[3]}", $"Runner-up {groups[2]}")
+};
+    }
+
+    private List<StaticMatch> GetSemiFinals()
+    {
+        return new()
+{
+new("Semi Final 1", "Winner of Quarter Final 1", "Winner of Quarter Final 2"),
+new("Semi Final 2", "Winner of Quarter Final 3", "Winner of Quarter Final 4")
+};
+    }
+}
