@@ -29,7 +29,8 @@
     {
         <div class="players-list">
             <div class="players-grid">
-                @foreach (var player in SeedData.Players)
+                @foreach (var player in SeedData.Players
+                            .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase))
                 {
                     <div class="player-card">
                         <span class="player-name">@player.Name</span>

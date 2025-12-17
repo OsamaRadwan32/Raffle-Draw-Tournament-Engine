@@ -1,5 +1,7 @@
 @using PadelTournamentApp.Data
 @inject SeedService SeedData
+@inject IJSRuntime JS
+
 
 <div class="draw-box">
     @if (_isShuffling)
@@ -17,6 +19,7 @@
 </div>
 
 @code {
+    private bool _jsReady;
     [Parameter] public EventCallback<int> OnTeamSelected { get; set; }
 
     private bool _isShuffling;
@@ -26,6 +29,16 @@
     private string _selectedName = string.Empty;
 
     private readonly Random _rand = new();
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsReady = true;
+        }
+
+        return Task.CompletedTask;
+    }
 
     public async Task StartDraw(List<int> remainingTeamIds)
     {
@@ -40,6 +53,10 @@
         _isShuffling = true;
         _selectedName = string.Empty;
 
+        if (_jsReady)
+        {
+            await JS.InvokeVoidAsync("drawSounds.playShuffle");
+        }
         StateHasChanged();
 
         // Shuffle animation (controlled rendering)
@@ -69,6 +86,12 @@
 
         _isShuffling = false;
         _selectedName = $"{fp1.Name} & {fp2.Name}";
+
+        if (_jsReady)
+        {
+            await JS.InvokeVoidAsync("drawSounds.stopShuffle");
+            await JS.InvokeVoidAsync("drawSounds.playSelect");
+        }
 
         StateHasChanged();
 

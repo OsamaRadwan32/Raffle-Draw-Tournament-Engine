@@ -252,44 +252,44 @@
       "Player1Id": 19,
       "Player2Id": 12,
       "Name": "Maher Amaneddine \u0026 Hassan Hariri",
-      "Rank": 1
+      "Rank": 2
     }
   ],
   "Groups": [
     {
       "GroupName": "Group A",
       "TeamIds": [
-        10,
+        7,
         13,
-        4,
-        2
+        5,
+        9
       ]
     },
     {
       "GroupName": "Group B",
       "TeamIds": [
-        6,
-        12,
-        5,
-        3
+        8,
+        10,
+        15,
+        17
       ]
     },
     {
       "GroupName": "Group C",
       "TeamIds": [
         14,
-        7,
-        9,
-        11
+        6,
+        2,
+        3
       ]
     },
     {
       "GroupName": "Group D",
       "TeamIds": [
-        8,
-        17,
-        16,
-        15
+        4,
+        12,
+        11,
+        16
       ]
     }
   ],

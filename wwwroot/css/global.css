@@ -326,70 +326,6 @@ main {
   box-shadow: 0 0 0 3px rgba(0, 194, 199, 0.18);
 }
 
-/* .input-text,
-.select-input {
-  padding: 10px;
-  border-radius: 8px;
-  border: 2px solid #a7e8e6;
-  font-size: 1rem;
-}
-
-.input-text {
-  width: 240px;
-}
-
-.select-input {
-  width: 200px;
-} */
-
-/* .btn-add {
-  background-color: #003b52;
-  color: white;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.team-form .btn-add {
-  padding: 10px 18px;
-}
-
-.btn-add:hover {
-  background-color: #00c2c7;
-  color: #003b52;
-  transform: translateY(-2px);
-} */
-
-/* .btn-reset,
-.btn-draw {
-  background-color: #003b52;
-  color: white;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.btn-reset:hover,
-.btn-draw:hover {
-  background-color: #00c2c7;
-  color: #003b52;
-  transform: translateY(-2px);
-}
-
-.btn-reset:disabled,
-.btn-draw:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-} */
-
 .btn-delete {
   background: #b30000;
   color: white;
@@ -456,22 +392,6 @@ main {
     flex-direction: column;
   }
 }
-
-/* .player-form .btn-add {
-  padding: 12px 18px;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(135deg, #00c2c7, #00a0a5);
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.player-form .btn-add:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0, 194, 199, 0.35);
-} */
 
 .status-message {
   margin-top: 10px;
@@ -629,7 +549,7 @@ main {
 
 .remaining-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
   gap: 12px;
   margin-top: 12px;
   width: 100%;
@@ -637,17 +557,17 @@ main {
 
 .team-box {
   background: rgba(255, 255, 255, 0.85);
-  padding: 4px 6px; /* slightly tighter */
+  padding: 8px 12px; /* slightly tighter */
   border-radius: 10px;
   border-left: 4px solid #00c2c7;
   border-right: 4px solid #00c2c7;
   box-shadow: 0 2px 8px rgba(0, 59, 82, 0.08);
 
   /* 🔹 Typography */
-  font-size: 0.78rem; /* smaller but still very readable */
+  font-size: 0.9rem; /* smaller but still very readable */
   font-weight: 600;
   color: #003b52;
-  line-height: 1.2;
+  line-height: 1.5;
 
   /* 🔹 Perfect centering */
   display: flex;
@@ -670,61 +590,6 @@ main {
   gap: 12px;
   flex-wrap: wrap;
 }
-
-/* .btn-draw {
-  background: linear-gradient(135deg, #00c2c7 0%, #0099b3 100%);
-  color: white;
-  padding: 12px 28px;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 194, 199, 0.25);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.btn-draw[disabled] {
-  opacity: 0.55;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-} */
-
-/* .btn-reset {
-  background: white;
-  color: #003b52;
-  padding: 12px 28px;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.btn-reset[disabled] {
-  opacity: 0.55;
-  cursor: not-allowed;
-  box-shadow: none;
-} */
-
-/* .btn-add {
-  background: linear-gradient(135deg, #003b52 0%, #005166 100%);
-  color: white;
-  padding: 12px 28px;
-  border: none;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 59, 82, 0.25);
-} */
 
 .status {
   font-size: 0.95rem;
