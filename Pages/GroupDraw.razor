@@ -201,23 +201,30 @@
         statusMessage = string.Empty;
     }
 
-    @* private async Task BeginShuffle()
+    private async Task BeginShuffle()
     {
         if (drawBox == null || remainingRankPool.Count == 0)
             return;
 
-        if (remainingRankPool.Count == 1)
+        // 🔑 ALL remaining teams → shuffle only
+        var shufflePool = allRemainingTeams.ToList();
+
+        // 🔑 Ranked pool → final selection
+        var selectionPool = remainingRankPool.ToList();
+
+        statusMessage = "Drawing...";
+
+        if (selectionPool.Count == 1)
         {
-            await HandleTeamSelected(remainingRankPool[0]);
+            await HandleTeamSelected(selectionPool[0]);
             return;
         }
 
-        statusMessage = "Drawing...";
-        await drawBox.StartDraw(remainingRankPool);
-    } *@
+        await drawBox.StartDraw(shufflePool, selectionPool);
+    }
 
     @* Auto Shuffling all the teams *@
-    private async Task BeginShuffle()
+    @* private async Task BeginShuffle()
     {
         if (drawBox == null || !canDraw)
             return;
@@ -259,7 +266,7 @@
         }
 
         statusMessage = "All teams drawn";
-    }
+    } *@
 
     private async Task HandleTeamSelected(int teamId)
     {

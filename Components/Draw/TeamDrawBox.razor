@@ -1,7 +1,7 @@
 @using PadelTournamentApp.Data
 @inject SeedService SeedData
 @inject IJSRuntime JS
-
+@inject ILogger<TeamDrawBox> Logger
 
 <div class="draw-box">
     @if (_isShuffling)
@@ -19,9 +19,11 @@
 </div>
 
 @code {
-    private bool _jsReady;
+    /* ===================== PARAMETERS ===================== */
     [Parameter] public EventCallback<int> OnTeamSelected { get; set; }
 
+    /* ===================== STATE ===================== */
+    private bool _jsReady;
     private bool _isShuffling;
     private bool _isBusy;
 
@@ -30,6 +32,7 @@
 
     private readonly Random _rand = new();
 
+    /* ===================== LIFECYCLE ===================== */
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -40,45 +43,56 @@
         return Task.CompletedTask;
     }
 
-    public async Task StartDraw(List<int> remainingTeamIds)
+    /* ===================== PUBLIC API ===================== */
+    public async Task StartDraw(List<int> shuffleTeamIds, List<int> rankedTeamIds)
     {
         // 🔒 Prevent concurrent runs
         if (_isBusy)
             return;
 
-        if (remainingTeamIds == null || remainingTeamIds.Count == 0)
+        if (rankedTeamIds == null || rankedTeamIds.Count == 0)
             return;
 
         _isBusy = true;
         _isShuffling = true;
         _selectedName = string.Empty;
 
+        // ▶️ Start shuffle sound
         if (_jsReady)
         {
             await JS.InvokeVoidAsync("drawSounds.playShuffle");
         }
         StateHasChanged();
 
-        // Shuffle animation (controlled rendering)
+        /* =====================================================
+        SHUFFLE ANIMATION
+        - Includes ALL remaining teams
+        - Ignores ranking completely
+        ===================================================== */
+        var shufflePool = shuffleTeamIds.ToList();
+
         for (int i = 0; i < 90; i++)
         {
-            var id = remainingTeamIds[_rand.Next(remainingTeamIds.Count)];
-            var team = SeedData.Teams.First(t => t.Id == id);
+            var teamId = shufflePool[_rand.Next(shufflePool.Count)]; var
+            team = SeedData.Teams.First(t => t.Id == teamId);
 
             var p1 = SeedData.Players.First(p => p.Id == team.Player1Id);
             var p2 = SeedData.Players.First(p => p.Id == team.Player2Id);
 
             _currentName = $"{p1.Name} & {p2.Name}";
+            Logger.LogInformation("[Shuffle] {Name}", _currentName);
 
-            // Only render every second iteration
             if (i % 2 == 0)
                 StateHasChanged();
 
             await Task.Delay(25);
         }
 
-        // Final selection
-        int finalTeamId = remainingTeamIds[_rand.Next(remainingTeamIds.Count)];
+        /* =====================================================
+        FINAL SELECTION
+        - Ranking-based (weighted)
+        ===================================================== */
+        int finalTeamId = SelectTeamByRanking(rankedTeamIds);
         var finalTeam = SeedData.Teams.First(t => t.Id == finalTeamId);
 
         var fp1 = SeedData.Players.First(p => p.Id == finalTeam.Player1Id);
@@ -87,6 +101,7 @@
         _isShuffling = false;
         _selectedName = $"{fp1.Name} & {fp2.Name}";
 
+        // ▶️ Stop shuffle + play select sound
         if (_jsReady)
         {
             await JS.InvokeVoidAsync("drawSounds.stopShuffle");
@@ -99,5 +114,36 @@
         await OnTeamSelected.InvokeAsync(finalTeamId);
 
         _isBusy = false;
+    }
+
+    /* ===================== HELPERS ===================== */
+
+    /// <summary>
+    /// Selects a team using ranking-based weighting.
+    /// Lower Rank = Higher Probability.
+    /// </summary>
+    private int SelectTeamByRanking(List<int> teamIds)
+    {
+        var weightedPool = new List<int>();
+
+        foreach (var teamId in teamIds)
+        {
+            var team = SeedData.Teams.First(t => t.Id == teamId);
+
+            // 🔧 CHANGE THIS LINE if your ranking property has a different name
+            int rank = team.Rank;
+
+            // Example weighting:
+            // Rank 1 → weight 5
+            // Rank 2 → weight 4
+            // Rank 3 → weight 3
+            // Rank 4 → weight 2
+            // Rank 5+ → weight 1
+            int weight = Math.Max(1, 6 - rank);
+
+            for (int i = 0; i < weight; i++) { weightedPool.Add(teamId); }
+        }
+        return
+        weightedPool[_rand.Next(weightedPool.Count)];
     }
 }
