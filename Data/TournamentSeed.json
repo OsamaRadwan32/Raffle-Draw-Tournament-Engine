@@ -131,16 +131,17 @@
     {
       "Id": 33,
       "Name": "Zaher Al Sanea"
+    },
+    {
+      "Id": 34,
+      "Name": "Serge Gerges"
+    },
+    {
+      "Id": 35,
+      "Name": "Mohammad Sabbagh"
     }
   ],
   "Teams": [
-    {
-      "Id": 1,
-      "Player1Id": 27,
-      "Player2Id": 13,
-      "Name": "Raed Abou Hadeer \u0026 Ibrahim Hleihel",
-      "Rank": 2
-    },
     {
       "Id": 2,
       "Player1Id": 26,
@@ -226,45 +227,50 @@
       "Rank": 1
     },
     {
+      "Id": 14,
+      "Player1Id": 32,
+      "Player2Id": 34,
+      "Name": "Youssef Hammoud \u0026 Serge Gerges",
+      "Rank": 1
+    },
+    {
       "Id": 15,
       "Player1Id": 25,
-      "Player2Id": 12,
-      "Name": "Peter Yamout \u0026 Hassan Hariri",
+      "Player2Id": 35,
+      "Name": "Peter Yamout \u0026 Mohammad Sabbagh",
       "Rank": 2
     },
     {
       "Id": 16,
-      "Player1Id": 32,
-      "Player2Id": 19,
-      "Name": "Youssef Hammoud \u0026 Maher Amaneddine",
-      "Rank": 0
+      "Player1Id": 14,
+      "Player2Id": 20,
+      "Name": "Jamil Dimassi \u0026 Mahmoud Hamwi",
+      "Rank": 2
+    },
+    {
+      "Id": 17,
+      "Player1Id": 19,
+      "Player2Id": 12,
+      "Name": "Maher Amaneddine \u0026 Hassan Hariri",
+      "Rank": 1
     }
   ],
   "Groups": [
     {
       "GroupName": "Group A",
-      "TeamIds": [
-        16,
-        6
-      ]
+      "TeamIds": []
     },
     {
       "GroupName": "Group B",
-      "TeamIds": [
-        4
-      ]
+      "TeamIds": []
     },
     {
       "GroupName": "Group C",
-      "TeamIds": [
-        10
-      ]
+      "TeamIds": []
     },
     {
       "GroupName": "Group D",
-      "TeamIds": [
-        8
-      ]
+      "TeamIds": []
     }
   ],
   "Knockout": [

@@ -84,6 +84,29 @@
                     </div>
                 }
             </div>
+
+            <!-- FINAL -->
+            <div class="matches">
+                <h4 class="matches-stage">Final</h4>
+
+                @foreach (var m in GetFinal())
+                {
+                    <div class="match-card">
+                        <div class="match-left">
+                            <div class="match-title">@m.Label</div>
+                            <div class="match-sep"></div>
+                        </div>
+
+                        <div class="match-center">
+                            <div class="match-sides">
+                                <span>@m.SideA</span>
+                                <strong>vs</strong>
+                                <span>@m.SideB</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
         }
 
     </section>
@@ -119,4 +142,15 @@ new("Semi Final 1", "Winner of Quarter Final 1", "Winner of Quarter Final 2"),
 new("Semi Final 2", "Winner of Quarter Final 3", "Winner of Quarter Final 4")
 };
     }
+
+    private List<StaticMatch> GetFinal()
+    {
+        return new()
+{
+new("Final", "Winner of Semi Final 1", "Winner of Semi Final 2")
+};
+    }
+}
+;
+}
 }

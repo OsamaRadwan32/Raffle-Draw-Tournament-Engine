@@ -199,7 +199,7 @@
         statusMessage = string.Empty;
     }
 
-    private async Task BeginShuffle()
+    @* private async Task BeginShuffle()
     {
         if (drawBox == null || remainingRankPool.Count == 0)
             return;
@@ -212,10 +212,10 @@
 
         statusMessage = "Drawing...";
         await drawBox.StartDraw(remainingRankPool);
-    }
+    } *@
 
     @* Auto Shuffling all the teams *@
-    @* private async Task BeginShuffle()
+    private async Task BeginShuffle()
     {
         if (drawBox == null || !canDraw)
             return;
@@ -257,7 +257,7 @@
         }
 
         statusMessage = "All teams drawn";
-    } *@
+    }
 
     private async Task HandleTeamSelected(int teamId)
     {
