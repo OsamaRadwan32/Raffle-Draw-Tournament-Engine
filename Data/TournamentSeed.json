@@ -258,39 +258,19 @@
   "Groups": [
     {
       "GroupName": "Group A",
-      "TeamIds": [
-        2,
-        10,
-        17,
-        12
-      ]
+      "TeamIds": []
     },
     {
       "GroupName": "Group B",
-      "TeamIds": [
-        16,
-        13,
-        5,
-        6
-      ]
+      "TeamIds": []
     },
     {
       "GroupName": "Group C",
-      "TeamIds": [
-        3,
-        14,
-        15,
-        8
-      ]
+      "TeamIds": []
     },
     {
       "GroupName": "Group D",
-      "TeamIds": [
-        11,
-        4,
-        9,
-        7
-      ]
+      "TeamIds": []
     }
   ],
   "Knockout": [
