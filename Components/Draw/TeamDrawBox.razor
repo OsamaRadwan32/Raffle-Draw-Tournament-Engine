@@ -146,4 +146,14 @@
         return
         weightedPool[_rand.Next(weightedPool.Count)];
     }
+
+    public void Clear()
+    {
+        _currentName = string.Empty;
+        _selectedName = string.Empty;
+        _isShuffling = false;
+
+        StateHasChanged();
+    }
+
 }

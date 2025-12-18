@@ -322,29 +322,25 @@
             LoadNextRankPool();
         }
 
-        // Auto-assign the LAST remaining team (no shuffle, no user action)
-        if (allRemainingTeams.Count == 1)
-        {
-            int lastTeamId = allRemainingTeams[0];
-
-            // Small delay for visual clarity
-            await Task.Delay(600);
-
-            await HandleTeamSelected(lastTeamId);
-
-            // Mark draw as completed so final animation can play
-            drawCompleted = true;
-            StateHasChanged();
-
-            return;
-        }
-
         // Final completion state (no teams remaining)
         if (allRemainingTeams.Count == 0)
         {
+            // Allow last team name to visibly appear in its group
+            StateHasChanged();
+            await Task.Delay(600);
+
+            // Clear the draw box AFTER last assignment is visible
+            drawBox?.Clear();
+            StateHasChanged();
+
+            // Short pause so audience registers completion
+            await Task.Delay(1500);
+
+            // Trigger final layout animation
             drawCompleted = true;
             StateHasChanged();
         }
+
 
         // Persist state after all mutations are complete
         await SeedData.SaveAsync();

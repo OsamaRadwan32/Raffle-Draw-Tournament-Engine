@@ -651,7 +651,7 @@ main {
   min-height: 200px; /* 🔑 ensures empty card matches full card */
 
   /* 🔑 Animate physical size changes */
-  transition: min-height 700ms ease, padding 700ms ease, box-shadow 700ms ease;
+  transition: min-height 2000ms ease, padding 700ms ease, box-shadow 700ms ease;
 }
 
 .group-final {
