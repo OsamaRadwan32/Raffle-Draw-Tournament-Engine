@@ -260,35 +260,35 @@
       "GroupName": "Group A",
       "TeamIds": [
         3,
-        14,
-        15,
-        10
+        7,
+        9,
+        14
       ]
     },
     {
       "GroupName": "Group B",
       "TeamIds": [
-        16,
-        4,
-        9,
+        15,
+        12,
+        5,
         8
       ]
     },
     {
       "GroupName": "Group C",
       "TeamIds": [
+        16,
+        10,
         2,
-        13,
-        5,
-        12
+        4
       ]
     },
     {
       "GroupName": "Group D",
       "TeamIds": [
-        17,
-        7,
         11,
+        13,
+        17,
         6
       ]
     }

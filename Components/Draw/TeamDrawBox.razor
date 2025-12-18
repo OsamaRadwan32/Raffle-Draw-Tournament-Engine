@@ -80,7 +80,7 @@
             var p2 = SeedData.Players.First(p => p.Id == team.Player2Id);
 
             _currentName = $"{p1.Name} & {p2.Name}";
-            Logger.LogInformation("[Shuffle] {Name}", _currentName);
+            @* Logger.LogInformation("[Shuffle] {Name}", _currentName); *@
 
             if (i % 2 == 0)
                 StateHasChanged();

@@ -23,7 +23,7 @@
     else
     {
         <!-- GROUPS -->
-        <div class="groups-container">
+        <div class="groups-container @(drawCompleted ? "draw-complete" : "")">
             @for (int i = 0; i < Groups.Count; i++)
             {
                 var g = Groups[i];
@@ -62,7 +62,7 @@
 
         <!-- CONTROLS -->
         <div class="draw-controls">
-            <button class="btn-draw" @onclick="BeginShuffle" disabled="@(!canDraw)">
+            <button class="btn-draw" @onclick="AutoDrawAllAsync" disabled="@(!canDraw)">
                 Draw Team
             </button>
 
@@ -109,40 +109,35 @@
 
 @code {
     private TeamDrawBox? drawBox;
-
     private List<Group> Groups = new();
     private Dictionary<int, List<int>> rankedPools = new();
     private List<int> remainingRankPool = new();
     private List<int> allRemainingTeams = new();
-
     private int currentRank;
     private bool teamsReady;
     private bool canDraw;
-
     private int highlightedGroupIndex = -1;
     private string statusMessage = string.Empty;
-
     private List<int> rankCycle = new();
     private int rankCursor = 0;
     private bool drawCompleted;
     private int drawsFromCurrentRank = 0;
     private int drawsPerRankRound => Groups.Count; // usually 4
-
-    // BACKEND-ONLY FLAG (no UI)
-    private const bool AUTO_DRAW_ALL = true;
+    private bool _autoDrawing;
 
     protected override void OnInitialized()
     {
+        // Ensure minimum number of teams exists
         teamsReady = SeedData.Teams.Count >= 2;
         if (!teamsReady)
             return;
 
-        // Initialize or load groups
+        // Load existing groups if present; otherwise create new ones
         Groups = SeedData.Groups.Count > 0
         ? SeedData.Groups
         : CreateGroups();
 
-        // Build ranked pools (Rank → TeamIds)
+        // Build rank pools: Rank → Team IDs
         rankedPools = SeedData.Teams
         .GroupBy(t => t.Rank)
         .OrderBy(g => g.Key)
@@ -151,40 +146,42 @@
         g => g.Select(t => t.Id).ToList()
         );
 
-        // Determine already assigned teams
+        // Collect teams already assigned to groups (important for reload scenarios)
         var assigned = Groups
         .SelectMany(g => g.TeamIds)
         .ToHashSet();
 
-        // All remaining teams (rank-neutral, UI shuffle source)
+        // Build list of ALL remaining teams (used for shuffle animation only)
         allRemainingTeams = SeedData.Teams
         .Where(t => !assigned.Contains(t.Id))
         .Select(t => t.Id)
         .ToList();
 
-        // 🔑 Build rank cycle (round-robin over ranks)
+        // Build rank cycle containing only ranks that still have unassigned teams
         rankCycle = rankedPools
         .Where(kvp => kvp.Value.Any(id => !assigned.Contains(id)))
         .Select(kvp => kvp.Key)
         .OrderBy(r => r)
         .ToList();
 
+        // Start from the SECOND-best rank if possible (e.g. Rank 2 before Rank 1)
         rankCursor = rankCycle.Count > 1 ? 1 : 0;
         if (rankCursor < 0)
             rankCursor = 0;
 
-        // Load first drawable rank pool
+        // Load the first rank pool to begin drawing
         LoadNextRankPool();
     }
 
-
     private List<Group> CreateGroups()
     {
+        // Calculate number of groups (max 4 teams per group)
         int totalTeams = SeedData.Teams.Count;
         int groupCount = (int)Math.Ceiling(totalTeams / 4.0);
 
         var groups = new List<Group>();
 
+        // Create groups named A, B, C, ...
         for (int i = 0; i < groupCount; i++)
         {
             groups.Add(new Group
@@ -193,6 +190,7 @@
             });
         }
 
+        // Persist newly created groups
         SeedData.Groups = groups;
         SeedData.Save();
 
@@ -201,6 +199,7 @@
 
     private void LoadNextRankPool()
     {
+        // If no ranks remain, the draw is finished
         if (rankCycle.Count == 0)
         {
             canDraw = false;
@@ -208,19 +207,22 @@
             return;
         }
 
+        // Recalculate assigned teams to avoid stale state
         var assigned = Groups.SelectMany(g => g.TeamIds).ToHashSet();
 
-        // Cycle ranks (round-robin)
+        // Select the current rank based on the rank cursor
         currentRank = rankCycle[rankCursor];
 
+        // Build remaining pool for this rank (excluding assigned teams)
         remainingRankPool = rankedPools[currentRank]
         .Where(id => !assigned.Contains(id))
         .ToList();
 
-        // If this rank is exhausted, remove it and recurse
+        // If this rank has no teams left, remove it and retry
         if (remainingRankPool.Count == 0)
         {
             rankCycle.RemoveAt(rankCursor);
+            // Ensure cursor stays within bounds
             if (rankCursor >= rankCycle.Count)
                 rankCursor = 0;
 
@@ -228,92 +230,133 @@
             return;
         }
 
+        // Enable drawing
         canDraw = true;
     }
 
     private async Task BeginShuffle()
     {
+        // Guard against invalid states
         if (drawBox == null || !canDraw)
             return;
 
+        // Pool used ONLY for UI shuffle animation (rank-neutral)
         var shufflePool = allRemainingTeams.ToList();
+        // Pool used ONLY for final selection (rank-restricted)
         var selectionPool = remainingRankPool.ToList();
 
         statusMessage = "Drawing...";
 
-        // ❌ Only skip shuffle if this is the LAST TEAM OVERALL
+        // Skip shuffle ONLY if this is the LAST team overall
         if (allRemainingTeams.Count == 1)
         {
             await HandleTeamSelected(allRemainingTeams[0]);
             return;
         }
 
+        // Trigger shuffle + selection inside TeamDrawBox
         await drawBox.StartDraw(shufflePool, selectionPool);
+    }
+
+    // Auto-draw all teams until completion
+    private async Task AutoDrawAllAsync()
+    {
+        // Prevent double-click or re-entry
+        if (_autoDrawing)
+            return;
+
+        _autoDrawing = true;
+
+        try
+        {
+            // Keep drawing while the draw is valid and teams remain
+            while (canDraw && allRemainingTeams.Count > 0)
+            {
+                // LAST TEAM: let existing logic auto-assign it
+                if (allRemainingTeams.Count == 1)
+                {
+                    await HandleTeamSelected(allRemainingTeams[0]);
+                    break;
+                }
+
+                // Trigger normal shuffle + selection
+                await BeginShuffle();
+
+                // ⏱ Pace between draws so spectators can follow
+                await Task.Delay(1200);
+            }
+        }
+        finally
+        {
+            _autoDrawing = false;
+        }
     }
 
     private async Task HandleTeamSelected(int teamId)
     {
-        // Determine group
+        // Determine target group (round-robin across groups)
         int totalAssigned = Groups.Sum(g => g.TeamIds.Count);
         int groupIndex = totalAssigned % Groups.Count;
 
-        // Mutate state (pure data changes only)
+        // Assign team to group
         Groups[groupIndex].TeamIds.Add(teamId);
         remainingRankPool.Remove(teamId);
         allRemainingTeams.Remove(teamId);
 
+        // Highlight group visually
         highlightedGroupIndex = groupIndex;
-
-        // Allow highlight to be visible
         await Task.Delay(400);
-
         highlightedGroupIndex = -1;
 
+        // Track how many draws were taken from this rank
         drawsFromCurrentRank++;
 
-        // Switch rank ONLY after one full group round
+        // Switch rank ONLY after a full round OR when rank is exhausted
         if (drawsFromCurrentRank >= drawsPerRankRound || remainingRankPool.Count == 0)
         {
             drawsFromCurrentRank = 0;
 
-            // 🔑 Advance to next rank in cycle
+            // Advance to next rank in round-robin order
             rankCursor = (rankCursor + 1) % rankCycle.Count;
 
             LoadNextRankPool();
         }
 
+        // Auto-assign the LAST remaining team (no shuffle, no user action)
         if (allRemainingTeams.Count == 1)
         {
             int lastTeamId = allRemainingTeams[0];
 
-            // Mark draw as completed BEFORE recursion
-            drawCompleted = true;
-
-            // 🔑 Force UI re-render so scaling animation applies
-            StateHasChanged();
-
-            // Small delay so animation is visible
+            // Small delay for visual clarity
             await Task.Delay(600);
 
             await HandleTeamSelected(lastTeamId);
+
+            // Mark draw as completed so final animation can play
+            drawCompleted = true;
+            StateHasChanged();
+
             return;
         }
 
+        // Final completion state (no teams remaining)
         if (allRemainingTeams.Count == 0)
         {
             drawCompleted = true;
             StateHasChanged();
         }
 
-        // Persist AFTER everything is stable
+        // Persist state after all mutations are complete
         await SeedData.SaveAsync();
     }
 
     private void ResetDraw()
     {
+        // Recreate groups and restart draw
         Groups = CreateGroups();
         currentRank = rankedPools.Keys.Min();
         LoadNextRankPool();
+        // Force full page reload to reset UI state
         Nav.NavigateTo("/groups", true);
     }
 
