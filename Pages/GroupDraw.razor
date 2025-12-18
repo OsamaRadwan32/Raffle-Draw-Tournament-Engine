@@ -308,6 +308,18 @@
         await Task.Delay(400);
         highlightedGroupIndex = -1;
 
+        // If THIS draw leaves exactly one team remaining, auto-assign it
+        if (allRemainingTeams.Count == 1)
+        {
+            int lastTeamId = allRemainingTeams[0];
+
+            // Small delay so spectators see the previous assignment
+            await Task.Delay(600);
+
+            await HandleTeamSelected(lastTeamId);
+            return;
+        }
+
         // Track how many draws were taken from this rank
         drawsFromCurrentRank++;
 
@@ -334,11 +346,11 @@
             StateHasChanged();
 
             // Short pause so audience registers completion
-            await Task.Delay(1500);
+            await Task.Delay(2000);
+            StateHasChanged();
 
             // Trigger final layout animation
             drawCompleted = true;
-            StateHasChanged();
         }
 
 

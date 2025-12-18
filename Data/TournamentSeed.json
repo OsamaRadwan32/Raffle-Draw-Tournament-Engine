@@ -139,6 +139,10 @@
     {
       "Id": 35,
       "Name": "Mohammad Sabbagh"
+    },
+    {
+      "Id": 36,
+      "Name": "Tina Sader"
     }
   ],
   "Teams": [
@@ -147,13 +151,6 @@
       "Player1Id": 26,
       "Player2Id": 3,
       "Name": "Rachad Khalifeh \u0026 Ali Sleem",
-      "Rank": 2
-    },
-    {
-      "Id": 3,
-      "Player1Id": 5,
-      "Player2Id": 10,
-      "Name": "Baraa Hariri \u0026 Ghida Bsat",
       "Rank": 2
     },
     {
@@ -253,24 +250,51 @@
       "Player2Id": 12,
       "Name": "Maher Amaneddine \u0026 Hassan Hariri",
       "Rank": 2
+    },
+    {
+      "Id": 18,
+      "Player1Id": 5,
+      "Player2Id": 36,
+      "Name": "Baraa Hariri \u0026 Tina Sader",
+      "Rank": 2
     }
   ],
   "Groups": [
     {
       "GroupName": "Group A",
-      "TeamIds": []
+      "TeamIds": [
+        9,
+        6,
+        18,
+        10
+      ]
     },
     {
       "GroupName": "Group B",
-      "TeamIds": []
+      "TeamIds": [
+        11,
+        8,
+        5,
+        7
+      ]
     },
     {
       "GroupName": "Group C",
-      "TeamIds": []
+      "TeamIds": [
+        16,
+        4,
+        15,
+        13
+      ]
     },
     {
       "GroupName": "Group D",
-      "TeamIds": []
+      "TeamIds": [
+        2,
+        12,
+        17,
+        14
+      ]
     }
   ],
   "Knockout": [
