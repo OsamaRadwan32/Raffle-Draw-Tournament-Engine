@@ -213,6 +213,20 @@ main {
   margin-top: 10px;
 }
 
+.home-powered {
+  display: block;
+  margin-top: 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  opacity: 0.9;
+  text-align: center;
+  position: absolute;
+  bottom: 14px;
+  left: 0;
+  right: 0;
+}
+
 /* ==================== HOME PAGE ==================== */
 .home-container {
   min-height: 100vh;
